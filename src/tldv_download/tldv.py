@@ -64,6 +64,8 @@ def download(meeting_id: str, auth_token: str):
     print(command)
     print("Downloading video...")
     system(command)
+    print("Download finished.")
+    print(filename)
 
 def main(
     meeting_url: Optional[str] = typer.Option(None),
