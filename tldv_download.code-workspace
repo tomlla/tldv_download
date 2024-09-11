@@ -1,0 +1,19 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "cSpell.customDictionaries": {
+      "project-words": {
+        "name": "project-words",
+        "path": "${workspaceRoot}/.cspell-project-words.txt",
+        "description": "Words used in this project",
+        "addWords": true
+      },
+      "custom": true,
+      "internal-terms": true // Disable the `internal-terms` dictionary
+    }
+  }
+}
