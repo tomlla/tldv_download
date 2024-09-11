@@ -5,6 +5,8 @@ from datetime import datetime
 from os import system
 import requests
 import json
+import typer
+from typing import *
 
 ## Please install ffmpeg before running this script and make sure it's in your PATH
 ## brew install ffmpeg
@@ -23,36 +25,36 @@ import json
 ## 10. Run this script and paste the URL and auth token
 ## 11. python3 tldv.py
 
-def get_input():
-    url = input("1. Please paste the URL of the meeting you want to download:")
+def get_input(meeting_url: Optional[str], auth_token):
+    url = meeting_url if meeting_url else input("\n1. Paste the tldv meeting URL(Example: https://tldv.io/app/meetings/XXXXXX):\n")
     meeting_id = url.split("/")[-1]
-    print("\nFound meeting ID: ", meeting_id)
+    print("Found meeting ID: ", meeting_id)
 
-    auth_token = input('2. Auth token(with "Bearer "):')
+    if not auth_token:
+        auth_token = input('\n2. Paste Auth token from Network Tab (with "Bearer "):\n')
 
     return [meeting_id, auth_token]
 
-def main():
-    [meeting_id, auth_token] = get_input()
 
+def download(meeting_id: str, auth_token: str):
     data = requests.get(
         f"https://gw.tldv.io/v1/meetings/{meeting_id}/watch-page?noTranscript=true",
         headers={
             "Authorization": auth_token,
         },
     )
-    response = json.loads(data.text)
+    response_body = json.loads(data.text)
 
-    meeting = response.get("meeting", {})
+    meeting = response_body.get("meeting", {})
     name = meeting.get("name", "No name")
-    createdAt = meeting.get("createdAt", datetime.now())
+
+    createdAt = meeting["createdAt"]
     print('createdAt:', createdAt)
-    source = response.get("video", {}).get("source", None)
-
     date = datetime.strptime(createdAt, "%Y-%m-%dT%H:%M:%S.%fZ")
-    normalised_date = date.strftime("%Y-%m-%d-%H-%M-%S")
+    normalized_date = date.strftime("%Y-%m-%d-%H-%M-%S")
+    filename = f"downloads/{normalized_date}_{name}.mp4"
 
-    filename = f"{normalised_date}_{name}.mp4"
+    source = response_body.get("video", {}).get("source", None)
     command = f'ffmpeg -i {source} -c copy "{filename}"'
     json_filename = f'{filename}.json'
 
@@ -63,5 +65,12 @@ def main():
     print("Downloading video...")
     system(command)
 
+def main(
+    meeting_url: Optional[str] = typer.Option(None),
+    auth_token: Optional[str] = typer.Option(None),
+):
+    [meeting_id, auth_token] = get_input(meeting_url, auth_token)
+    download(meeting_id, auth_token)
+
 if __name__ == "__main__":
-	main()
+    typer.run(main)
