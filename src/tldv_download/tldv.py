@@ -7,6 +7,7 @@ import requests
 import json
 import typer
 from typing import *
+import urllib.parse
 
 ## Please install ffmpeg before running this script and make sure it's in your PATH
 ## brew install ffmpeg
@@ -26,8 +27,9 @@ from typing import *
 ## 11. python3 tldv.py
 
 def get_input(meeting_url: Optional[str], auth_token):
-    url = meeting_url if meeting_url else input("\n1. Paste the tldv meeting URL(Example: https://tldv.io/app/meetings/XXXXXX):\n")
-    meeting_id = url.split("/")[-1]
+    url_str = meeting_url if meeting_url else input("\n1. Paste the tldv meeting URL(Example: https://tldv.io/app/meetings/XXXXXX):\n")
+    url = urllib.parse.urlparse(url_str)
+    meeting_id = url.path.split("/")[-1]
     print("Found meeting ID: ", meeting_id)
 
     if not auth_token:
